@@ -70,7 +70,6 @@ set the --spdx-ids to only output the IDs of the entities.
 		-1,
 		"recursion level",
 	)
-
 	outlineCmd.PersistentFlags().BoolVar(
 		&outlineOpts.OnlyIDs,
 		"spdx-ids",
@@ -88,6 +87,13 @@ set the --spdx-ids to only output the IDs of the entities.
 		"purl",
 		false,
 		"show package urls instead of name@version",
+	)
+	outlineCmd.PersistentFlags().StringVarP(
+		&outlineOpts.RootID,
+		"root",
+		"r",
+		"",
+		"pics a root object to render the document from",
 	)
 
 	parent.AddCommand(outlineCmd)

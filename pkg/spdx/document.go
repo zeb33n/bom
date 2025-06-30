@@ -131,6 +131,7 @@ type DrawingOptions struct {
 	ASCIIOnly   bool
 	Purls       bool
 	Version     bool
+	RootID      string
 }
 
 // String returns the SPDX string of the external document ref.
@@ -338,6 +339,11 @@ func (d *Document) Outline(o *DrawingOptions) (outline string, err error) {
 	fmt.Fprintln(builder, treeLines(o, 0, ""))
 	i := 0
 	for _, p := range d.Packages {
+		println(p.SPDXID())
+		println(o.RootID)
+		if p.SPDXID() != o.RootID {
+			continue
+		}
 		i++
 		o.LastItem = true
 		if i < len(d.Packages) {
