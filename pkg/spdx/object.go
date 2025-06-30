@@ -40,6 +40,7 @@ import (
 type Object interface {
 	SPDXID() string
 	SetSPDXID(string)
+	GetName() string
 	ReadSourceFile(string) error
 	Render() (string, error)
 	BuildID(seeds ...string)
@@ -79,9 +80,14 @@ func (e *Entity) SPDXID() string {
 	return e.ID
 }
 
-// SPDXID returns the SPDX reference string for the object.
+// SetSPDXID returns the SPDX reference string for the object.
 func (e *Entity) SetSPDXID(id string) {
 	e.ID = id
+}
+
+// GetName Gets Name.
+func (e *Entity) GetName() string {
+	return e.Name
 }
 
 // BuildID sets the file ID, optionally from a series of strings.

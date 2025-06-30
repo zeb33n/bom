@@ -314,6 +314,23 @@ func treeLines(o *DrawingOptions, depth int, connector string) string {
 	return res
 }
 
+func recursiveSearch(name string, p Object, depth int) bool {
+	if depth == 1 {
+		return false
+	}
+	for _, rel := range *p.GetRelationships() {
+		relName := rel.Peer.GetName()
+		if name == relName {
+			return true
+		}
+		out := recursiveSearch(relName, rel.Peer, depth-1)
+		if out {
+			return out
+		}
+	}
+	return false
+}
+
 // Outline draws an outline of the relationships inside the doc.
 func (d *Document) Outline(o *DrawingOptions) (outline string, err error) {
 	seen := map[string]struct{}{}
@@ -339,11 +356,13 @@ func (d *Document) Outline(o *DrawingOptions) (outline string, err error) {
 	fmt.Fprintln(builder, treeLines(o, 0, ""))
 	i := 0
 	for _, p := range d.Packages {
-		println(p.SPDXID())
-		println(o.RootID)
-		if p.SPDXID() != o.RootID {
+		// want to filter recursively -> only print all parents and all nodes
+		// can just do a recursive child search then get children with depth
+
+		if !recursiveSearch(o.RootID, p, o.Recursion) && o.RootID != "" {
 			continue
 		}
+
 		i++
 		o.LastItem = true
 		if i < len(d.Packages) {
