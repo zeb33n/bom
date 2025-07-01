@@ -315,15 +315,15 @@ func treeLines(o *DrawingOptions, depth int, connector string) string {
 }
 
 func recursiveSearch(name string, p Object, depth int) bool {
-	if depth == 1 {
+	if depth == 0 {
 		return false
 	}
+	relName := p.GetName()
+	if relName == name {
+		return true
+	}
 	for _, rel := range *p.GetRelationships() {
-		relName := rel.Peer.GetName()
-		if name == relName {
-			return true
-		}
-		out := recursiveSearch(relName, rel.Peer, depth-1)
+		out := recursiveSearch(name, rel.Peer, depth-1)
 		if out {
 			return out
 		}
@@ -358,10 +358,7 @@ func (d *Document) Outline(o *DrawingOptions) (outline string, err error) {
 	for _, p := range d.Packages {
 		// want to filter recursively -> only print all parents and all nodes
 		// can just do a recursive child search then get children with depth
-
-		if !recursiveSearch(o.RootID, p, o.Recursion) && o.RootID != "" {
-			continue
-		}
+		// outline find ?
 
 		i++
 		o.LastItem = true
