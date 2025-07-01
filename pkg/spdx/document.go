@@ -314,23 +314,6 @@ func treeLines(o *DrawingOptions, depth int, connector string) string {
 	return res
 }
 
-func recursiveSearch(name string, p Object, depth int) bool {
-	if depth == 0 {
-		return false
-	}
-	relName := p.GetName()
-	if relName == name {
-		return true
-	}
-	for _, rel := range *p.GetRelationships() {
-		out := recursiveSearch(name, rel.Peer, depth-1)
-		if out {
-			return out
-		}
-	}
-	return false
-}
-
 // Outline draws an outline of the relationships inside the doc.
 func (d *Document) Outline(o *DrawingOptions) (outline string, err error) {
 	seen := map[string]struct{}{}

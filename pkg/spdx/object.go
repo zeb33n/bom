@@ -40,7 +40,6 @@ import (
 type Object interface {
 	SPDXID() string
 	SetSPDXID(string)
-	GetName() string
 	ReadSourceFile(string) error
 	Render() (string, error)
 	BuildID(seeds ...string)
@@ -48,6 +47,7 @@ type Object interface {
 	AddRelationship(*Relationship)
 	GetRelationships() *[]*Relationship
 	ToProvenanceSubject() *intoto.Subject
+	RecursiveSearch(name string, depth int) bool
 	getProvenanceSubjects(opts *ProvenanceOptions, seen *map[string]struct{}) []intoto.Subject
 	GetElementByID(string) Object
 }
@@ -85,11 +85,6 @@ func (e *Entity) SetSPDXID(id string) {
 	e.ID = id
 }
 
-// GetName Gets Name.
-func (e *Entity) GetName() string {
-	return e.Name
-}
-
 // BuildID sets the file ID, optionally from a series of strings.
 func (e *Entity) BuildID(seeds ...string) {
 	if len(seeds) <= 1 {
@@ -124,6 +119,23 @@ func (e *Entity) ReadChecksums(filePath string) error {
 	}
 
 	return nil
+}
+
+func (e *Entity) RecursiveSearch(name string, depth int) bool {
+	if depth == 0 {
+		return false
+	}
+	relName := e.Name
+	if relName == name {
+		return true
+	}
+	for _, rel := range *e.GetRelationships() {
+		out := rel.Peer.RecursiveSearch(name, depth-1)
+		if out {
+			return out
+		}
+	}
+	return false
 }
 
 // ReadSourceFile reads the source file for the package and populates

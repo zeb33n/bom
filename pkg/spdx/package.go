@@ -391,25 +391,14 @@ func (p *Package) drawName(o *DrawingOptions) string {
 func (p *Package) Draw(builder *strings.Builder, o *DrawingOptions, depth int, seen *map[string]struct{}) {
 	(*seen)[p.SPDXID()] = struct{}{}
 
-	println(p.Name)
-	println(p.GetName())
-	println(o.RootID)
-	print("Depth: ")
-	println(depth)
-	print("Sum: ")
-	println(o.Recursion - depth)
-	println(recursiveSearch(o.RootID, p, (o.Recursion-depth)+1))
+	if !p.RecursiveSearch(o.RootID, (o.Recursion-depth)+1) && o.RootID != "" {
+		return
+	}
 	title := p.drawTitle(o)
 	if !o.SkipName {
 		fmt.Fprintln(builder, treeLines(o, depth-1, connectorT)+title)
 	}
 
-	if !recursiveSearch(o.RootID, p, (o.Recursion-depth)+1) && o.RootID != "" {
-		println("RETURNED")
-		println("")
-		return
-	}
-	println("")
 	connector := ""
 	if len(p.Relationships) == 0 || (o.Recursion > 0 && depth >= o.Recursion) {
 		connector = connectorL
