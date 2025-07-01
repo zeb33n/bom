@@ -132,6 +132,7 @@ type DrawingOptions struct {
 	Purls       bool
 	Version     bool
 	RootID      string
+	On          bool
 }
 
 // String returns the SPDX string of the external document ref.
@@ -339,10 +340,11 @@ func (d *Document) Outline(o *DrawingOptions) (outline string, err error) {
 	fmt.Fprintln(builder, treeLines(o, 0, ""))
 	i := 0
 	for _, p := range d.Packages {
-		// want to filter recursively -> only print all parents and all nodes
-		// can just do a recursive child search then get children with depth
-		// outline find ?
-
+		println(p.Name)
+		if !p.RecursiveSearch(o.RootID, o.Recursion, &map[string]struct{}{}) && o.RootID != "" {
+			println("CALLED")
+			continue
+		}
 		i++
 		o.LastItem = true
 		if i < len(d.Packages) {

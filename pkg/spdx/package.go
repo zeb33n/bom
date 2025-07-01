@@ -391,9 +391,6 @@ func (p *Package) drawName(o *DrawingOptions) string {
 func (p *Package) Draw(builder *strings.Builder, o *DrawingOptions, depth int, seen *map[string]struct{}) {
 	(*seen)[p.SPDXID()] = struct{}{}
 
-	if !p.RecursiveSearch(o.RootID, (o.Recursion-depth)+1) && o.RootID != "" {
-		return
-	}
 	title := p.drawTitle(o)
 	if !o.SkipName {
 		fmt.Fprintln(builder, treeLines(o, depth-1, connectorT)+title)
@@ -413,6 +410,12 @@ func (p *Package) Draw(builder *strings.Builder, o *DrawingOptions, depth int, s
 	i := 0
 	for _, rel := range p.Relationships {
 		i++
+		if !rel.Peer.RecursiveSearch(o.RootID, o.Recursion-depth, &map[string]struct{}{}) && o.RootID != "" {
+			// need to handle line count more efectively
+			continue
+		}
+		println(rel.Peer.SPDXID())
+		println(o.Recursion - depth)
 		o.LastItem = true
 		if i < len(p.Relationships) {
 			o.LastItem = false

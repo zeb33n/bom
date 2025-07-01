@@ -47,7 +47,7 @@ type Object interface {
 	AddRelationship(*Relationship)
 	GetRelationships() *[]*Relationship
 	ToProvenanceSubject() *intoto.Subject
-	RecursiveSearch(name string, depth int) bool
+	RecursiveSearch(name string, depth int, seen *map[string]struct{}) bool
 	getProvenanceSubjects(opts *ProvenanceOptions, seen *map[string]struct{}) []intoto.Subject
 	GetElementByID(string) Object
 }
@@ -121,17 +121,23 @@ func (e *Entity) ReadChecksums(filePath string) error {
 	return nil
 }
 
-func (e *Entity) RecursiveSearch(name string, depth int) bool {
-	if depth == 0 {
-		return false
-	}
-	relName := e.Name
-	if relName == name {
+//nolint:gocritic // seen is a pointer recursively populated
+func (e *Entity) RecursiveSearch(name string, depth int, seen *map[string]struct{}) bool {
+	if eName := e.Name; eName == name {
 		return true
 	}
+	if _, ok := (*seen)[e.SPDXID()]; ok {
+		return false
+	}
+	(*seen)[e.SPDXID()] = struct{}{}
+	if depth == 1 {
+		return false
+	}
 	for _, rel := range *e.GetRelationships() {
-		out := rel.Peer.RecursiveSearch(name, depth-1)
-		if out {
+		if rel.Peer == nil {
+			continue
+		}
+		if out := rel.Peer.RecursiveSearch(name, depth-1, seen); out {
 			return out
 		}
 	}
