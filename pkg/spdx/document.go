@@ -120,6 +120,11 @@ type ExternalRef struct {
 	Locator  string // unique string with no spaces
 }
 
+type ToDotOptions struct {
+	Find      string
+	Recursion int
+}
+
 type DrawingOptions struct {
 	Width       int
 	Height      int
@@ -131,6 +136,7 @@ type DrawingOptions struct {
 	ASCIIOnly   bool
 	Purls       bool
 	Version     bool
+	Find        string
 }
 
 // String returns the SPDX string of the external document ref.
@@ -275,6 +281,29 @@ func (d *Document) Render() (doc string, err error) {
 	return doc, err
 }
 
+func (d *Document) ToDot(o *ToDotOptions) string {
+	out := escape(d.Name) + ";\n"
+	seen := &map[string]struct{}{}
+	for _, p := range d.Packages {
+		if o.Find != "" {
+			filteredObject := recursiveNameFilter(o.Find, p, o.Recursion, &map[string]struct{}{})
+			if filteredObject == nil {
+				continue
+			}
+			out += escape(d.Name) + " -> " + escape(p.SPDXID()) + ";\n"
+			var ok bool
+			p, ok = filteredObject.(*Package)
+			if !ok {
+				return "ERRRRRRR"
+			}
+		} else {
+			out += escape(d.Name) + " -> " + escape(p.SPDXID()) + ";\n"
+		}
+		out += toDot(p, o.Recursion, seen)
+	}
+	return out
+}
+
 // AddFile adds a file contained in the package.
 func (d *Document) AddFile(file *File) error {
 	if d.Files == nil {
@@ -311,6 +340,24 @@ func treeLines(o *DrawingOptions, depth int, connector string) string {
 	res := " " + strings.Repeat(fmt.Sprintf(" %s ", stick), depth)
 	res += " " + connector + " "
 	return res
+}
+
+// FilterReverseDependencies filters the document to only include direct paths to
+// Objects with the name name. Hence finding that Object's reverse dependencies.
+func (d *Document) FilterReverseDependencies(name string, depth int) {
+	keepPackages := map[string]*Package{}
+	var ok bool
+	for packageName, p := range d.Packages {
+		object := recursiveNameFilter(name, p, depth, &map[string]struct{}{})
+		if object == nil {
+			continue
+		}
+		if p, ok = object.(*Package); !ok {
+			log.Fatal("Object interface is not of type Package")
+		}
+		keepPackages[packageName] = p
+	}
+	d.Packages = keepPackages
 }
 
 // Outline draws an outline of the relationships inside the doc.

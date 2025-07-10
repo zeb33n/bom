@@ -136,6 +136,26 @@ func NewPackage() (p *Package) {
 	return p
 }
 
+// ToDot returns a represntation of the package as a dotlang node
+func (p *Package) ToDot() string {
+	sURL := ""
+	if url := p.Purl(); url != nil {
+		sURL = url.ToString()
+	}
+
+	return fmt.Sprintf(
+		`%q [tooltip="version: %s\nlicense: %s\nSupplier-Org: %s\nSupplier-Person: %s\nOriginator-Org: %s\nOriginator-Person: %s\nURL: %s"]`,
+		p.SPDXID(),
+		p.Version,
+		p.LicenseDeclared,
+		p.Supplier.Organization,
+		p.Supplier.Person,
+		p.Originator.Organization,
+		p.Originator.Person,
+		sURL,
+	)
+}
+
 // AddFile adds a file contained in the package.
 func (p *Package) AddFile(file *File) error {
 	p.Lock()
@@ -401,7 +421,11 @@ func (p *Package) Draw(builder *strings.Builder, o *DrawingOptions, depth int, s
 		connector = connectorL
 	}
 
-	fmt.Fprintf(builder, treeLines(o, depth, connector)+"🔗 %d Relationships\n", len(p.Relationships))
+	// not printed when find is set since relationships will be filtered out from the graph.
+	if o.Find == "" {
+		fmt.Fprintf(builder, treeLines(o, depth, connector)+"🔗 %d Relationships\n", len(p.Relationships))
+	}
+
 	if depth >= o.Recursion && o.Recursion > 0 {
 		fmt.Fprintln(builder, treeLines(o, depth-1, ""))
 		return
