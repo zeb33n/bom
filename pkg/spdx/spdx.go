@@ -290,6 +290,34 @@ func recursiveNameFilter(name string, o Object, depth int, seen *map[string]bool
 	return out
 }
 
+func escape(s string) string {
+	return fmt.Sprintf("%q", s)
+}
+
+//nolint:gocritic // seen is a pointer recursively populated
+func toDot(o Object, depth int, seen *map[string]struct{}) string {
+	if _, ok := (*seen)[o.SPDXID()]; ok {
+		return ""
+	}
+	(*seen)[o.SPDXID()] = struct{}{}
+	s := o.ToDot() + ";\n"
+	if depth == 1 {
+		return s
+	}
+	rels := *o.GetRelationships()
+	if rels == nil {
+		return s
+	}
+	for _, rel := range rels {
+		if rel.Peer == nil {
+			continue
+		}
+		s += escape(o.SPDXID()) + " -> " + escape(rel.Peer.SPDXID()) + ";\n"
+		s += toDot(rel.Peer, depth-1, seen)
+	}
+	return s
+}
+
 // recursiveIDSearch is a function that recursively searches an object's peers
 // to find the specified SPDX ID. If found, returns a copy of the object.
 //

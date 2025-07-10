@@ -496,7 +496,6 @@ func TestRecursiveNameFilter(t *testing.T) {
 		&map[string]bool{},
 	)
 	require.True(t, ok)
-
 	// check filtered == expected
 	require.Equal(t, ePackages["root-p"], packages["root-p"])
 }

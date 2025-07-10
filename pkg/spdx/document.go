@@ -120,6 +120,12 @@ type ExternalRef struct {
 	Locator  string // unique string with no spaces
 }
 
+type ToDotOptions struct {
+	Find         string
+	Recursion    int
+	SubGraphRoot string
+}
+
 type DrawingOptions struct {
 	Width       int
 	Height      int
@@ -274,6 +280,39 @@ func (d *Document) Render() (doc string, err error) {
 	}
 
 	return doc, err
+}
+
+func (d *Document) ToDot(o *ToDotOptions) string {
+	out := ""
+	if o.SubGraphRoot == "" {
+		out = escape(d.Name) + ";\n"
+	}
+	seenFilter := &map[string]struct{}{}
+	var ok bool
+	for _, p := range d.Packages {
+		var object Object = p
+		if o.SubGraphRoot != "" {
+			object = recursiveIDSearch(o.SubGraphRoot, object, &map[string]struct{}{})
+		}
+		if object == nil {
+			continue
+		}
+		if o.Find != "" {
+			object = recursiveNameFilter(o.Find, object, o.Recursion, &map[string]struct{}{})
+		}
+		if object == nil {
+			continue
+		}
+		if o.SubGraphRoot == "" {
+			out += escape(d.Name) + " -> " + escape(p.SPDXID()) + ";\n"
+		}
+		p, ok = object.(*Package)
+		if !ok {
+			return "ERRRRRRR"
+		}
+		out += toDot(p, o.Recursion, seenFilter)
+	}
+	return fmt.Sprintf("digraph {\n%s\n}\n", out)
 }
 
 // AddFile adds a file contained in the package.

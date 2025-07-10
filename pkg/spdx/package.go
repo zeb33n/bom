@@ -136,6 +136,28 @@ func NewPackage() (p *Package) {
 	return p
 }
 
+// ToDot returns a representation of the package as a dotlang node.
+func (p *Package) ToDot() string {
+	sURL := ""
+	if url := p.Purl(); url != nil {
+		sURL = url.ToString()
+	}
+
+	return fmt.Sprintf(
+		`%q [label=%q tooltip="SPXID: %s\nversion: %s\nlicense: %s\nSupplier-Org: %s\nSupplier-Person: %s\nOriginator-Org: %s\nOriginator-Person: %s\nURL: %s"]`,
+		p.SPDXID(),
+		p.Name,
+		p.SPDXID(),
+		p.Version,
+		p.LicenseDeclared,
+		p.Supplier.Organization,
+		p.Supplier.Person,
+		p.Originator.Organization,
+		p.Originator.Person,
+		sURL,
+	)
+}
+
 // AddFile adds a file contained in the package.
 func (p *Package) AddFile(file *File) error {
 	p.Lock()
