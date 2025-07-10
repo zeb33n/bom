@@ -28,11 +28,24 @@ func AddToDot(parent *cobra.Command) {
 	toDotOpts := &spdx.ToDotOptions{}
 	toDotCmd := &cobra.Command{
 		PersistentPreRunE: initLogging,
-		Short:             "dump SPDX as a dot file",
-		Long:              `TODO!`,
-		Use:               "todot SPDX_FILE|URL",
-		SilenceUsage:      true,
-		SilenceErrors:     true,
+		Short:             "bom document todot -> dump the structure of the a SPDX document as dotlang.",
+		Long: `bom document todot -> dump the structure of the a SPDX document as dotlang.
+
+This Subcommand translates the graph like structure of an spdx document into dotlang,
+An abstract grammar used to represent graphs https://graphviz.org/doc/info/lang.html.
+
+This is printed to stdout but can easily be piped to a file like so.
+
+bom document todot file.spdx > file.dot
+
+The output can also be filtered by depth, (--depth), inverse dependencies (--find)
+or subgraph (--subgraph) to aid with visualisation by tools like Graphviz
+
+bom will try to add useful information to dotlangs tooltip node attribute.
+`,
+		Use:           "todot SPDX_FILE|URL",
+		SilenceUsage:  true,
+		SilenceErrors: true,
 		RunE: func(_ *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				args = append(args, "")

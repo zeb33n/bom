@@ -294,6 +294,9 @@ func escape(s string) string {
 	return fmt.Sprintf("%q", s)
 }
 
+// toDot traverses an objects relationships to return a representation
+// of the object and all its peers as a string of valid dotlang.
+//
 //nolint:gocritic // seen is a pointer recursively populated
 func toDot(o Object, depth int, seen *map[string]struct{}) string {
 	if _, ok := (*seen)[o.SPDXID()]; ok {
