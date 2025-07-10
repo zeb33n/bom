@@ -142,11 +142,15 @@ func (p *Package) ToDot() string {
 	if url := p.Purl(); url != nil {
 		sURL = url.ToString()
 	}
+	name := p.Name
+	if p.Version != "" {
+		name = name + "@" + p.Version
+	}
 
 	return fmt.Sprintf(
 		`%q [label=%q tooltip="SPXID: %s\nversion: %s\nlicense: %s\nSupplier-Org: %s\nSupplier-Person: %s\nOriginator-Org: %s\nOriginator-Person: %s\nURL: %s"]`,
 		p.SPDXID(),
-		p.Name,
+		name,
 		p.SPDXID(),
 		p.Version,
 		p.LicenseDeclared,
