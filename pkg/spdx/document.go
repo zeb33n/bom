@@ -290,25 +290,16 @@ func (d *Document) ToDot(o *ToDotOptions) string {
 	seenFilter := &map[string]struct{}{}
 	var ok bool
 	for _, p := range d.Packages {
-		var object Object = p
 		if o.SubGraphRoot != "" {
-			object = recursiveIDSearch(o.SubGraphRoot, object, &map[string]struct{}{})
-		}
-		if object == nil {
-			continue
-		}
-		if o.Find != "" {
-			object = recursiveNameFilter(o.Find, object, o.Recursion, &map[string]struct{}{})
-		}
-		if object == nil {
-			continue
-		}
-		if o.SubGraphRoot == "" {
+			p, ok = recursiveIDSearch(o.SubGraphRoot, p, &map[string]struct{}{}).(*Package)
+			if p == nil {
+				continue
+			}
+			if !ok {
+				log.Fatal("Interface object is not of expected type Package")
+			}
+		} else {
 			out += escape(d.Name) + " -> " + escape(p.SPDXID()) + ";\n"
-		}
-		p, ok = object.(*Package)
-		if !ok {
-			return "ERRRRRRR"
 		}
 		out += toDot(p, o.Recursion, seenFilter)
 	}

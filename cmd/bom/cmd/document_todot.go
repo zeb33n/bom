@@ -54,6 +54,9 @@ bom will try to add useful information to dotlangs tooltip node attribute.
 			if err != nil {
 				return fmt.Errorf("opening doc: %w", err)
 			}
+			if toDotOpts.Find != "" {
+				doc.FilterReverseDependencies(toDotOpts.Find, toDotOpts.Recursion)
+			}
 			fmt.Println(doc.ToDot(toDotOpts))
 			return nil
 		},
