@@ -303,7 +303,7 @@ func (d *Document) ToDot(o *ToDotOptions) string {
 		}
 		out += toDot(p, o.Recursion, seenFilter)
 	}
-	return fmt.Sprintf("digraph {\nfontname=\"monospace\"\n%s\n}\n", out)
+	return fmt.Sprintf("digraph {\n%s\n}\n", out)
 }
 
 // AddFile adds a file contained in the package.

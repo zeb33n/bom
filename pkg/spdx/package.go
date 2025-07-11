@@ -148,7 +148,9 @@ func (p *Package) ToDot() string {
 	}
 
 	return fmt.Sprintf(
-		`%q [label=%q tooltip="SPXID: %s\nversion: %s\nlicense: %s\nSupplier-Org: %s\nSupplier-Person: %s\nOriginator-Org: %s\nOriginator-Person: %s\nURL: %s"]`,
+		`%q [label=%q tooltip="SPXID: %s\nversion: %s\nlicense: %s\nSupplier-Org:`+
+			`%s\nSupplier-Person: %s\nOriginator-Org: %s\nOriginator-Person: %s\nURL: `+
+			`%s" fontname = "monospace"]`,
 		p.SPDXID(),
 		name,
 		p.SPDXID(),
