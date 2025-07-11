@@ -25,6 +25,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -415,6 +416,57 @@ func TestIgnorePatterns(t *testing.T) {
 	p, err = impl.IgnorePatterns(dir, nil, false)
 	require.NoError(t, err)
 	require.Len(t, p, 4)
+}
+
+func TestToDot(t *testing.T) {
+	/*
+		create the following package structure
+
+					root
+					 |
+				-----------
+				|         |
+			node-1       node-2
+			    |         |
+			    -----------
+			         |
+			       leaf
+	*/
+
+	packageIDs := []string{"root", "node-1", "node-2", "leaf"}
+	edges := []struct {
+		p string
+		c string
+	}{
+		{"root", "node-1"},
+		{"root", "node-2"},
+		{"node-1", "leaf"},
+		{"node-2", "leaf"},
+	}
+	packages := map[string]*Package{}
+	for _, id := range packageIDs {
+		p := NewPackage()
+		p.SetSPDXID(id)
+		p.Name = id
+		packages[id] = p
+	}
+
+	for _, edge := range edges {
+		require.NoError(t, packages[edge.p].AddPackage(packages[edge.c]))
+	}
+	expectedDot := strings.Split(`"root" [label="root" tooltip="SPXID: root\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
+"root" -> "node-1";
+"node-1" [label="node-1" tooltip="SPXID: node-1\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
+"node-1" -> "leaf";
+"leaf" [label="leaf" tooltip="SPXID: leaf\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
+"root" -> "node-2";
+"node-2" [label="node-2" tooltip="SPXID: node-2\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
+"node-2" -> "leaf";
+`, "\n")
+	actualDot := strings.Split(toDot(packages["root"], -1, &map[string]struct{}{}), "\n")
+	slices.Sort(expectedDot)
+	slices.Sort(actualDot)
+	require.Equal(t, expectedDot, actualDot)
 }
 
 func TestRecursiveNameFilter(t *testing.T) {
