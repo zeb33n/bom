@@ -454,6 +454,8 @@ func TestToDot(t *testing.T) {
 	for _, edge := range edges {
 		require.NoError(t, packages[edge.p].AddPackage(packages[edge.c]))
 	}
+
+	// split and and sort by line since order here is not deterministic.
 	expectedDot := strings.Split(`"root" [label="root" tooltip="SPXID: root\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
 "root" -> "node-1";
 "node-1" [label="node-1" tooltip="SPXID: node-1\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
@@ -463,7 +465,9 @@ func TestToDot(t *testing.T) {
 "node-2" [label="node-2" tooltip="SPXID: node-2\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
 "node-2" -> "leaf";
 `, "\n")
+	// run function
 	actualDot := strings.Split(toDot(packages["root"], -1, &map[string]struct{}{}), "\n")
+
 	slices.Sort(expectedDot)
 	slices.Sort(actualDot)
 	require.Equal(t, expectedDot, actualDot)
