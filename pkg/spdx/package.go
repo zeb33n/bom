@@ -150,6 +150,9 @@ func safeLen(v any) int {
 
 func structToString(s any, ignoreNils bool, ignore ...string) string {
 	v := reflect.ValueOf(s)
+	if v.Kind() == reflect.Pointer {
+		v = v.Elem()
+	}
 	typeOf := v.Type()
 	out := ""
 	for i := range v.NumField() {
@@ -158,13 +161,10 @@ func structToString(s any, ignoreNils bool, ignore ...string) string {
 			continue
 		}
 		fieldValue := v.Field(i).Interface()
-		t := reflect.TypeOf(fieldValue)
-		if ignoreNils {
-			if safeLen(fieldValue) == 0 {
-				continue
-			}
+		if ignoreNils && safeLen(fieldValue) == 0 {
+			continue
 		}
-		if t.Kind() == reflect.Struct {
+		if reflect.TypeOf(fieldValue).Kind() == reflect.Struct {
 			out += structToString(fieldValue, ignoreNils, ignore...)
 		} else {
 			out += fmt.Sprintf(`%s: %v\n`, fieldName, fieldValue)
@@ -175,7 +175,7 @@ func structToString(s any, ignoreNils bool, ignore ...string) string {
 
 // ToDot returns a representation of the package as a dotlang node.
 func (p *Package) ToDot() string {
-	packageData := structToString(*p, true, "RWMutex", "Opts", "Relationships")
+	packageData := structToString(p, true, "RWMutex", "Opts", "Relationships")
 
 	sURL := ""
 	if url := p.Purl(); url != nil {
