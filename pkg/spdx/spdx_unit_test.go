@@ -456,18 +456,18 @@ func TestToDot(t *testing.T) {
 	}
 
 	// split and sort by line since order here is not deterministic.
-	expectedDot := strings.Split(`"root" [label="root" tooltip="SPXID: root\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
+	expectedDot := strings.Split(`"root" [label="root" tooltip="ID: root\nName: root\nFilesAnalyzed: false\n" fontname="monospace"];
 "root" -> "node-1";
-"node-1" [label="node-1" tooltip="SPXID: node-1\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
+"node-1" [label="node-1" tooltip="ID: node-1\nName: node-1\nFilesAnalyzed: false\n" fontname="monospace"];
 "node-1" -> "leaf";
-"leaf" [label="leaf" tooltip="SPXID: leaf\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
+"leaf" [label="leaf" tooltip="ID: leaf\nName: leaf\nFilesAnalyzed: false\n" fontname="monospace"];
 "root" -> "node-2";
-"node-2" [label="node-2" tooltip="SPXID: node-2\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
+"node-2" [label="node-2" tooltip="ID: node-2\nName: node-2\nFilesAnalyzed: false\n" fontname="monospace"];
 "node-2" -> "leaf";
 `, "\n")
 	// run function
 	actualDot := strings.Split(toDot(packages["root"], -1, &map[string]struct{}{}), "\n")
-
+	println(toDot(packages["root"], -1, &map[string]struct{}{}))
 	slices.Sort(expectedDot)
 	slices.Sort(actualDot)
 	require.Equal(t, expectedDot, actualDot)
