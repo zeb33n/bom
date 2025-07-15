@@ -136,6 +136,29 @@ func NewPackage() (p *Package) {
 	return p
 }
 
+// ToDot returns a representation of the package as a dotlang node.
+func (p *Package) ToDot() string {
+	packageData := structToString(p, true, "RWMutex", "Opts", "Relationships")
+
+	sURL := ""
+	if url := p.Purl(); url != nil {
+		sURL = fmt.Sprintf(`URL: %s\n`, url.ToString())
+	}
+
+	name := p.Name
+	if p.Version != "" {
+		name = name + "@" + p.Version
+	}
+
+	return fmt.Sprintf(
+		`%q [label=%q tooltip="%s%s" fontname="monospace"]`,
+		p.SPDXID(),
+		name,
+		packageData,
+		sURL,
+	)
+}
+
 // AddFile adds a file contained in the package.
 func (p *Package) AddFile(file *File) error {
 	p.Lock()
