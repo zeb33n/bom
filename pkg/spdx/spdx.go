@@ -281,6 +281,9 @@ func structToString(s any, ignoreNils bool, ignore ...string) string {
 	if v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
+	if v.Kind() != reflect.Struct {
+		return ""
+	}
 	typeOf := v.Type()
 	out := ""
 	for i := range v.NumField() {

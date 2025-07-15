@@ -418,6 +418,34 @@ func TestIgnorePatterns(t *testing.T) {
 	require.Len(t, p, 4)
 }
 
+func TestStructToString(t *testing.T) {
+	testStruct := struct {
+		A string
+		B int
+		C struct {
+			D string
+			E int
+			F struct {
+				G bool
+			}
+		}
+	}{
+		"hello", 1, struct {
+			D string
+			E int
+			F struct {
+				G bool
+			}
+		}{"", 2, struct {
+			G bool
+		}{false}},
+	}
+	require.Equal(t, "", structToString(1, false))
+	require.Equal(t, `A: hello\nB: 1\nD: \nE: 2\nG: false\n`, structToString(testStruct, false))
+	require.Equal(t, `A: hello\nB: 1\nE: 2\nG: false\n`, structToString(testStruct, true))
+	require.Equal(t, `B: 1\nE: 2\n`, structToString(testStruct, true, "A", "G"))
+}
+
 func TestToDot(t *testing.T) {
 	/*
 		create the following package structure
@@ -467,7 +495,6 @@ func TestToDot(t *testing.T) {
 `, "\n")
 	// run function
 	actualDot := strings.Split(toDot(packages["root"], -1, &map[string]struct{}{}), "\n")
-	println(toDot(packages["root"], -1, &map[string]struct{}{}))
 	slices.Sort(expectedDot)
 	slices.Sort(actualDot)
 	require.Equal(t, expectedDot, actualDot)
