@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -262,6 +264,41 @@ func Banner() string {
 		return ""
 	}
 	return string(d)
+}
+
+func safeLen(v any) int {
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Array, reflect.Chan, reflect.Map, reflect.Slice, reflect.String:
+		return rv.Len()
+	default:
+		return -1
+	}
+}
+
+func structToString(s any, ignoreNils bool, ignore ...string) string {
+	v := reflect.ValueOf(s)
+	if v.Kind() == reflect.Pointer {
+		v = v.Elem()
+	}
+	typeOf := v.Type()
+	out := ""
+	for i := range v.NumField() {
+		fieldName := typeOf.Field(i).Name
+		if slices.Contains(ignore, fieldName) {
+			continue
+		}
+		fieldValue := v.Field(i).Interface()
+		if ignoreNils && safeLen(fieldValue) == 0 {
+			continue
+		}
+		if reflect.TypeOf(fieldValue).Kind() == reflect.Struct {
+			out += structToString(fieldValue, ignoreNils, ignore...)
+		} else {
+			out += fmt.Sprintf(`%s: %v\n`, fieldName, fieldValue)
+		}
+	}
+	return out
 }
 
 // recursiveNameFilter is a function that recursivley filters an objects peers inplace
