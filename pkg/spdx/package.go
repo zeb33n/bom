@@ -29,6 +29,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"reflect"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -136,30 +138,60 @@ func NewPackage() (p *Package) {
 	return p
 }
 
+func safeLen(v any) int {
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Array, reflect.Chan, reflect.Map, reflect.Slice, reflect.String:
+		return rv.Len()
+	default:
+		return -1
+	}
+}
+
+func structToString(s any, ignoreNils bool, ignore ...string) string {
+	v := reflect.ValueOf(s)
+	typeOf := v.Type()
+	out := ""
+	for i := range v.NumField() {
+		fieldName := typeOf.Field(i).Name
+		if slices.Contains(ignore, fieldName) {
+			continue
+		}
+		fieldValue := v.Field(i).Interface()
+		t := reflect.TypeOf(fieldValue)
+		if ignoreNils {
+			if safeLen(fieldValue) == 0 {
+				continue
+			}
+		}
+		if t.Kind() == reflect.Struct {
+			out += structToString(fieldValue, ignoreNils, ignore...)
+		} else {
+			out += fmt.Sprintf(`%s: %v\n`, fieldName, fieldValue)
+		}
+	}
+	return out
+}
+
 // ToDot returns a representation of the package as a dotlang node.
 func (p *Package) ToDot() string {
+	packageData := structToString(*p, true, "RWMutex", "Opts", "Relationships")
+
 	sURL := ""
 	if url := p.Purl(); url != nil {
-		sURL = url.ToString()
+		sURL = fmt.Sprintf(`URL: %s\n`, url.ToString())
 	}
+
 	name := p.Name
 	if p.Version != "" {
 		name = name + "@" + p.Version
 	}
 
 	return fmt.Sprintf(
-		`%q [label=%q tooltip="SPXID: %s\nversion: %s\nlicense: %s\nSupplier-Org:`+
-			`%s\nSupplier-Person: %s\nOriginator-Org: %s\nOriginator-Person: %s\nURL: `+
-			`%s" fontname = "monospace"]`,
+		`%q [label=%q tooltip="%s%s" fontname="monospace"]`,
 		p.SPDXID(),
 		name,
-		p.SPDXID(),
-		p.Version,
-		p.LicenseDeclared,
-		p.Supplier.Organization,
-		p.Supplier.Person,
-		p.Originator.Organization,
-		p.Originator.Person,
+		packageData,
 		sURL,
 	)
 }

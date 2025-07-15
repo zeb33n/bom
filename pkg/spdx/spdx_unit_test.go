@@ -455,7 +455,7 @@ func TestToDot(t *testing.T) {
 		require.NoError(t, packages[edge.p].AddPackage(packages[edge.c]))
 	}
 
-	// split and and sort by line since order here is not deterministic.
+	// split and sort by line since order here is not deterministic.
 	expectedDot := strings.Split(`"root" [label="root" tooltip="SPXID: root\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
 "root" -> "node-1";
 "node-1" [label="node-1" tooltip="SPXID: node-1\nversion: \nlicense: \nSupplier-Org:\nSupplier-Person: \nOriginator-Org: \nOriginator-Person: \nURL: " fontname = "monospace"];
