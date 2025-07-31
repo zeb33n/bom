@@ -440,7 +440,7 @@ func TestStructToString(t *testing.T) {
 			G bool
 		}{false}},
 	}
-	require.Equal(t, "", structToString(1, false))
+	require.Empty(t, structToString(1, false))
 	require.Equal(t, `A: hello\nB: 1\nD: \nE: 2\nG: false\n`, structToString(testStruct, false))
 	require.Equal(t, `A: hello\nB: 1\nE: 2\nG: false\n`, structToString(testStruct, true))
 	require.Equal(t, `B: 1\nE: 2\n`, structToString(testStruct, true, "A", "G"))
@@ -579,6 +579,7 @@ func TestRecursiveNameFilter(t *testing.T) {
 		&map[string]bool{},
 	)
 	require.True(t, ok)
+
 	// check filtered == expected
 	require.Equal(t, ePackages["root-p"], packages["root-p"])
 }
