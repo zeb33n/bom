@@ -122,7 +122,7 @@ type ExternalRef struct {
 
 type ToDotOptions struct {
 	Find         string
-	Recursion    int
+	Depth        int
 	SubGraphRoot string
 }
 
@@ -301,7 +301,7 @@ func (d *Document) ToDot(o *ToDotOptions) string {
 		} else {
 			out += escape(d.Name) + " -> " + escape(p.SPDXID()) + ";\n"
 		}
-		out += toDot(p, o.Recursion, seenFilter)
+		out += toDot(p, o.Depth, seenFilter)
 	}
 	return fmt.Sprintf("digraph {\n%s\n}\n", out)
 }

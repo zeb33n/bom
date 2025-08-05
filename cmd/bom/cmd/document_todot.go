@@ -28,8 +28,8 @@ func AddToDot(parent *cobra.Command) {
 	toDotOpts := &spdx.ToDotOptions{}
 	toDotCmd := &cobra.Command{
 		PersistentPreRunE: initLogging,
-		Short:             "bom document todot -> dump the structure of the a SPDX document as dotlang.",
-		Long: `bom document todot -> dump the structure of the a SPDX document as dotlang.
+		Short:             "bom document todot -> dump the SPDX document as dotlang.",
+		Long: `bom document todot -> dump the SPDX document as dotlang.
 
 This Subcommand translates the graph like structure of an spdx document into dotlang,
 An abstract grammar used to represent graphs https://graphviz.org/doc/info/lang.html.
@@ -55,7 +55,7 @@ bom will try to add useful information to dotlangs tooltip node attribute.
 				return fmt.Errorf("opening doc: %w", err)
 			}
 			if toDotOpts.Find != "" {
-				doc.FilterReverseDependencies(toDotOpts.Find, toDotOpts.Recursion)
+				doc.FilterReverseDependencies(toDotOpts.Find, toDotOpts.Depth)
 			}
 			fmt.Println(doc.ToDot(toDotOpts))
 			return nil
@@ -69,7 +69,7 @@ bom will try to add useful information to dotlangs tooltip node attribute.
 		"Find node in DAG",
 	)
 	toDotCmd.PersistentFlags().IntVarP(
-		&toDotOpts.Recursion,
+		&toDotOpts.Depth,
 		"depth",
 		"d",
 		-1,
@@ -80,7 +80,7 @@ bom will try to add useful information to dotlangs tooltip node attribute.
 		"subgraph",
 		"s",
 		"",
-		"SPXID of the root node for the subgraph",
+		"SPDXID of the root node for the subgraph",
 	)
 	parent.AddCommand(toDotCmd)
 }
