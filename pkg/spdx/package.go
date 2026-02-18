@@ -98,6 +98,8 @@ type Package struct {
 	Comment              string   // a place for the SPDX document creator to record any general comments
 	HomePage             string   // A web site that serves as the package home page
 	PrimaryPurpose       string   // Estimate of the most likely package usage
+	VendorInfo           string
+	SourceInfo           string
 
 	// Supplier: the actual distribution source for the package/directory
 	Supplier struct {
